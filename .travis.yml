@@ -1,0 +1,41 @@
+language: go
+go:
+  - 1.20.x
+
+service:
+  - docker
+
+git:
+  depth: 1
+
+env:
+  global:
+    - USER="okpalaChidiebere"
+    - DOCKER_USERNAME="aluminetchidiebre"
+    - SERVICE_NAME="chirper-app-image-filter-service"
+    - GOPRIVATE="github.com/${USER}"
+    - DOCKER_BUILDKIT=1
+
+# Pre-testing installs
+before_install:
+  - echo -e "machine github.com\n  login $CI_USER_TOKEN" > $HOME/.netrc
+  - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.52.2
+
+install:
+  - echo "nothing needs to be installed; skipping..."
+
+# Scripts to be run such as tests
+before_script:
+  - echo "skipping before_script step..."
+
+script:
+  - golangci-lint run --disable errcheck || travis_terminate 1
+  - go test -v -race ./...
+
+deploy:
+  provider: script
+  script: docker --version;
+    echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin;
+    docker build --secret id=gitcredentials,src=$HOME/.netrc -t "$DOCKER_USERNAME"/"$SERVICE_NAME":"$TRAVIS_BUILD_ID" --build-arg GOPRIVATE=$GOPRIVATE .;
+    docker images;
+    docker push "$DOCKER_USERNAME"/"$SERVICE_NAME":"$TRAVIS_BUILD_ID";
