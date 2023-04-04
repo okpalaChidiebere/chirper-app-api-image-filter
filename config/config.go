@@ -43,10 +43,14 @@ func (c *Config) IsLocal() bool {
 	return c.Aws.Aws_profile != "DEPLOYED"
 }
 
-func mustGetenv (k string) string {
+func mustGetenv(k string) string {
 	v, ok := os.LookupEnv(k)
-	if !ok {
+	if !ok && !IsTestRun() {
 		log.Fatalf("Warning: %s environment variable is not set.", k)
 	}
 	return v
+}
+
+func IsTestRun() bool {
+  return os.Getenv("EXECUTION_ENVIRONMENT") == "test"
 }
