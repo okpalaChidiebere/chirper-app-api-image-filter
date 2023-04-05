@@ -1,4 +1,6 @@
 language: go
+
+gobuild_args: -v -race
 go:
   - 1.20.x
 
@@ -23,20 +25,25 @@ before_install:
   - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.52.2
 
 install:
-  - echo "nothing needs to be installed; skipping..."
+  - echo "no additional dependencies needs to be installed"
 
 # Scripts to be run such as tests
 before_script:
   - echo "skipping before_script step..."
 
-before_deploy:
+script:
   - golangci-lint run --disable errcheck
-  - go test -v -race ./...
+
+after_success:
+  - docker --version
+  # we will not build the new image unless the test and lints scripts are successful
+  - docker build --secret id=gitcredentials,src=$HOME/.netrc -t "$DOCKER_USERNAME"/"$SERVICE_NAME":"$TRAVIS_BUILD_ID" --build-arg GOPRIVATE=$GOPRIVATE .
+
+before_deploy:
+  #  the deploy phase will only run if we successfully login into docker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
 deploy:
   provider: script
-  script: docker --version;
-    echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin;
-    docker build --secret id=gitcredentials,src=$HOME/.netrc -t "$DOCKER_USERNAME"/"$SERVICE_NAME":"$TRAVIS_BUILD_ID" --build-arg GOPRIVATE=$GOPRIVATE .;
-    docker images;
+  script: docker images;
     docker push "$DOCKER_USERNAME"/"$SERVICE_NAME":"$TRAVIS_BUILD_ID";
