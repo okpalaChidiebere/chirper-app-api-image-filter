@@ -84,7 +84,7 @@ func (s *ServiceImpl) FilterImageFromURL(ctx context.Context, inputURL string, h
         return "", err
     }
 
-	// outPath := data.Path(fmt.Sprintf("tmp/filtered.%s.jpg", imageKey))
+	outPath := data.Path(fmt.Sprintf("tmp/filtered.%s.jpg", imageKey))
 
     //this is the resized image
     resImg := resize(img, 300, 300)
@@ -96,23 +96,10 @@ func (s *ServiceImpl) FilterImageFromURL(ctx context.Context, inputURL string, h
     //this is the resized image []bytes with desired quality
     imgBytes := quality(result, 90)
 
-    // f, err := os.Create(outPath)
-    f, err :=  os.CreateTemp(data.Path("tmp"), fmt.Sprintf("filtered.%s.*jpg", imageKey))
+	err = os.WriteFile(outPath, imgBytes, 0777)
     if err != nil {
         return "", err
     }
-
-    _, err = f.Write(imgBytes)
-    if err != nil {
-        return "", err
-    }
-
-	// err = os.WriteFile(outPath, imgBytes, 0777)
-    // if err != nil {
-    //     return "", err
-    // }
-
-    outPath := f.Name()
 
 	return outPath, nil
 }
