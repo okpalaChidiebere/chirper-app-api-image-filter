@@ -241,7 +241,7 @@ func Test_UploadImageToS3Bucket(t *testing.T) {
 
 	// We can choose to have these files deleted on program close
     // defer os.Remove(file.Name())
-	// DeleteLocalFiles([]string{file.Name()})
+	DeleteLocalFiles([]string{file.Name()})
 }
 
 func createRandomImage(rect image.Rectangle) (created *image.NRGBA) {
