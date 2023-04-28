@@ -1,0 +1,78 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chirper-app-image-filter-service-deployment # we give our pod a name so that we can reference it in pods list
+  labels:
+    service: chirper-app-image-filter-service
+spec:
+  replicas: 1 # we have two pods to be created at start to handle horizontal scaling which we can configure later. Kubernetes will attempt to maintain the number of desired replicas. If a pod is terminated, it will automatically recreate the pod.
+  selector:
+    matchLabels:
+      service: chirper-app-image-filter-service
+  template:
+    metadata:
+      labels:
+        service: chirper-app-image-filter-service
+    spec:
+      containers: # we define the container where we want the docker image pulled from
+        - name: chirper-app-image-filter-service
+          image: aluminetchidiebre/chirper-app-image-filter-service:262078741
+          imagePullPolicy: Always
+          livenessProbe:
+            exec:
+              command:
+                - "curl"
+                - "-X POST"
+                - "-f"
+                - "--header 'Content-Type: application/json'"
+                - "http://localhost:9000/grpc.health.v1.Health/Check"
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+          ports:
+            - containerPort: 9000
+          volumeMounts:
+            - name: aws-secret
+              mountPath: "/root/.aws/"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "1024Mi"
+              cpu: "500m"
+          env:
+            - name: AWS_PROFILE
+              valueFrom:
+                configMapKeyRef:
+                  name: env-config
+                  key: AWS_PROFILE
+            - name: AWS_REGION
+              valueFrom:
+                configMapKeyRef:
+                  name: env-config
+                  key: AWS_REGION
+      restartPolicy: Always
+      volumes:
+        - name: aws-secret
+          secret:
+            secretName: aws-secret
+      imagePullSecrets:
+        - name: reg-docker-cred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chirper-app-image-filter-service
+  labels:
+    service: chirper-app-image-filter-service
+spec:
+  ports:
+    # listen on local port 9000 and forward to port 9000 on a Pod created by <chirper-app-image-filter-service-deployment>
+    - port: 9000
+      targetPort: 9000
+      protocol: TCP
+  selector:
+    service: chirper-app-image-filter-service
+  type: ClusterIP

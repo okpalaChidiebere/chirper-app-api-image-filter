@@ -26,3 +26,18 @@ This is a microservice responsible for everything images for the chirper-app. It
 
 - We used Travis CI for our build which basically spins up a computer for use remotely and build our app. That computer has git in it. So just provided our github credentials to it which our the computer to build our app with the private modules. It was a good learning. Now if you want do that github step in docker you can checkout this [link](https://jwenz723.medium.com/fetching-private-go-modules-during-docker-build-5b76aa690280). Remember there are ways to provide credentials to github for it to use. See them [here](https://docs.travis-ci.com/user/private-dependencies/). I prefer to use API token
 - Learn how to make a go private module with docker [here](https://medium.com/the-godev-corner/how-to-create-a-go-private-module-with-docker-b705e4d195c4)
+
+## Environment Variables
+
+You can explore other ways to make environment variables easy your go app.
+
+- [Golang with Viper](https://dev.to/techschoolguru/load-config-from-file-environment-variables-in-golang-with-viper-2j2d), [here](https://dev.to/techschoolguru/load-config-from-file-environment-variables-in-golang-with-viper-2j2d) and [here](https://github.com/spf13/viper/issues/239)
+- [Golang with Envconfig](https://dev.to/ilyakaznacheev/a-clean-way-to-pass-configs-in-a-go-application-1g64) and [here](https://github.com/kelseyhightower/envconfig)
+- [https://stackoverflow.com/questions/40326540/how-to-assign-default-value-if-env-var-is-empty](https://stackoverflow.com/questions/40326540/how-to-assign-default-value-if-env-var-is-empty)
+- [You can checkout](https://www.linkedin.com/pulse/go-dockerized-grpc-server-example-tiago-melo/?trk=pulse-article_more-articles_related-content-card)
+- [How to Know If a Golang App is Executed with go test](https://medium.com/picus-security-engineering/how-to-know-if-a-golang-app-is-executed-with-go-test-66487ccd71b6)
+
+## Assigning IAM Role to a Pod Kubernetes
+
+- [Example application with IAM credentials](https://kubernetes-on-aws.readthedocs.io/en/latest/user-guide/example-credentials.html)
+- [Diving into IAM Roles for Service Accounts](https://aws.amazon.com/blogs/containers/diving-into-iam-roles-for-service-accounts/)
